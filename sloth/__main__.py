@@ -4,17 +4,17 @@ import pathlib
 import random
 
 SCREEN_TITLE = "Sloth"
-SPR_WIDTH = 120
-SPR_HEIGHT = 120
+SPR_WIDTH = 30
+SPR_HEIGHT = 30
 SPR_SPACE_Y = 15
 # number of Picts in a wheel
-WHEEL_LENGTH = 6
+WHEEL_LENGTH = 20
 # Seconds
-SPIN_TIME = 1
-STOP_TIME = 0.2
-SPIN_VELOCITY = 2
+SPIN_TIME = 1500
+STOP_TIME = 200
+SPIN_VELOCITY = 20
 GAME_FPS = 60
-GAME_RES = (0, 0)
+GAME_RES = (800, 600)
 
 
 class Pict(pygame.sprite.Sprite):
@@ -31,11 +31,10 @@ class Pict(pygame.sprite.Sprite):
         self.rect.x = init_x
         self.rect.y = init_y
 
-    def update(self):
-        if self.rect.y < SPR_HEIGHT / 2:
-            # this does not work, because we do not know at which
-            # position the wheel has stopped.
-            self.rect.y = WHEEL_LENGTH * (SPR_HEIGHT + SPR_SPACE_Y)
+    def update(self, velocity):
+        self.rect.y += velocity
+        if self.rect.y >= 600:
+            self.rect.y = 0
 
 
 class Wheel(pygame.sprite.Group):
@@ -50,6 +49,8 @@ class Wheel(pygame.sprite.Group):
         self.is_stopping = False
         self.stop_timer = 0.0
         self.velocity = 0.0
+        self.height = 600
+        self.num_picts = num
         symbol_path = pathlib.Path("images", "pictures")
         symbols = list(symbol_path.glob("*.png"))
         random.shuffle(symbols)
@@ -61,8 +62,8 @@ class Wheel(pygame.sprite.Group):
 
     def set_velocity(self, velocity):
         self.velocity = velocity
-        for spr in self.sprites():
-            spr.rect.y = velocity
+        # for spr in self.sprites():
+        #     spr.rect.y += velocity
 
     def get_velocity(self) -> float:
         return self.velocity
@@ -87,7 +88,7 @@ class Wheel(pygame.sprite.Group):
                 steps = STOP_TIME / delta_time
                 self.set_velocity(cur_v - SPIN_VELOCITY / steps)
         for spr in self.sprites():
-            spr.update()
+            spr.update(self.get_velocity())
 
     # def draw(self):
     #     super().draw()
@@ -100,7 +101,7 @@ def mainloop(screen, clock):
     spin_timer = 0
     # x = 0
     # inc = 10
-    wheel1 = Wheel(50, 50, 12)
+    wheel1 = Wheel(300, 0, WHEEL_LENGTH)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -143,7 +144,8 @@ def mainloop(screen, clock):
 if __name__ == "__main__":
 
     pygame.init()
-    flags = pygame.FULLSCREEN | pygame.DOUBLEBUF
+    # flags = pygame.FULLSCREEN | pygame.DOUBLEBUF
+    flags = pygame.DOUBLEBUF
     screen = pygame.display.set_mode(GAME_RES, flags, vsync=1)
     clock = pygame.time.Clock()
     mainloop(screen, clock)
