@@ -128,8 +128,7 @@ class WheelManager():
     def __init__(self, pos_x):
         self.wheels = []
         self.pos_x = pos_x
-        w_pixel_length = WHEEL_LENGTH * (SPR_HEIGHT + SPR_SPACE_Y)
-        self.pos_y = - w_pixel_length + 600
+        self.pos_y = 0
 
     def insert_new_wheel(self, pos=999, spin_duration=500):
         if pos > len(self.wheels):
