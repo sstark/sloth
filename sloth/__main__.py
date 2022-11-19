@@ -9,10 +9,8 @@ SPR_HEIGHT = 60
 SPR_SPACE_X = 20
 SPR_SPACE_Y = 15
 # number of Picts in a wheel
-WHEEL_LENGTH = 50
-# Seconds
-SPIN_TIME = 500
-STOP_TIME = 120
+WHEEL_LENGTH = 70
+STOP_TIME = 250
 SPIN_VELOCITY = 50
 GAME_FPS = 60
 GAME_RES = (800, 600)
@@ -40,7 +38,7 @@ class Wheel(pygame.sprite.Group):
     Represents one wheel of slot machine
     """
 
-    def __init__(self, pos_x, pos_y, num):
+    def __init__(self, pos_x, pos_y, num, spin_duration):
         super().__init__()
         self.pos_y = pos_y
         self.is_spinning = False
@@ -49,6 +47,7 @@ class Wheel(pygame.sprite.Group):
         self.velocity = 0.0
         self.height = 600
         self.spin_timer = 0
+        self.spin_duration = spin_duration
 
         symbol_path = pathlib.Path("images", "pictures")
         symbols = list(symbol_path.glob("*.png"))
@@ -102,11 +101,11 @@ class WheelManager():
         w_pixel_length = WHEEL_LENGTH * (SPR_HEIGHT + SPR_SPACE_Y)
         self.pos_y = - w_pixel_length + 600
 
-    def insert_new_wheel(self, pos=999):
+    def insert_new_wheel(self, pos=999, spin_duration=500):
         if pos > len(self.wheels):
             pos = len(self.wheels)
         x = self.pos_x + (pos+1) * (SPR_WIDTH + SPR_SPACE_X)
-        self.wheels.insert(pos, Wheel(x, self.pos_y, WHEEL_LENGTH))
+        self.wheels.insert(pos, Wheel(x, self.pos_y, WHEEL_LENGTH, spin_duration))
         self.reorder()
 
     def reorder(self):
@@ -130,9 +129,9 @@ def mainloop(screen, clock):
     delta_time = 0
     running = True
     wm = WheelManager(200)
-    wm.insert_new_wheel()
-    wm.insert_new_wheel()
-    wm.insert_new_wheel()
+    wm.insert_new_wheel(spin_duration=500)
+    wm.insert_new_wheel(spin_duration=900)
+    wm.insert_new_wheel(spin_duration=1300)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -144,7 +143,7 @@ def mainloop(screen, clock):
         for wheel in wm.wheels:
             if wheel.is_spinning:
                 wheel.spin_timer += delta_time
-                if wheel.spin_timer >= SPIN_TIME:
+                if wheel.spin_timer >= wheel.spin_duration:
                     wheel.spin_timer = 0
                     wheel.stop()
         wm.update(delta_time)
