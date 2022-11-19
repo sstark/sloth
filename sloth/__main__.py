@@ -24,7 +24,6 @@ class Pict(pygame.sprite.Sprite):
 
     def __init__(self, img, init_x, init_y):
         super().__init__()
-        # self.image = pygame.Surface([SPR_WIDTH, SPR_HEIGHT])
         self.image = pygame.image.load(img)
         self.image = pygame.transform.scale(self.image, (SPR_WIDTH, SPR_HEIGHT))
         self.rect = self.image.get_rect()
@@ -59,8 +58,6 @@ class Wheel(pygame.sprite.Group):
 
     def set_velocity(self, velocity):
         self.velocity = velocity
-        # for spr in self.sprites():
-        #     spr.rect.y += velocity
 
     def get_velocity(self) -> float:
         return self.velocity
@@ -87,10 +84,6 @@ class Wheel(pygame.sprite.Group):
         for spr in self.sprites():
             spr.update(self.get_velocity())
 
-    # def draw(self):
-    #     super().draw()
-    #     for spr in self.sprites():
-    #         # spr.draw()
 
 def mainloop(screen, clock):
     delta_time = 0
@@ -98,8 +91,6 @@ def mainloop(screen, clock):
     spin_timer1 = 0
     spin_timer2 = 0
     spin_timer3 = 0
-    # x = 0
-    # inc = 10
     # initial y position of the wheel
     w_pixel_length = WHEEL_LENGTH * (SPR_HEIGHT + SPR_SPACE_Y)
     w_y_pos = - w_pixel_length + 600
@@ -116,8 +107,6 @@ def mainloop(screen, clock):
                     wheel2.spin()
                     wheel3.spin()
         screen.fill((0,0,0))
-        # x = (x + inc) % screen.get_width()
-        # pygame.draw.line(screen, (255, 255, 255), (x, 0), (x, screen.get_height()), 1)
         if wheel1.is_spinning:
             spin_timer1 += delta_time
             if spin_timer1 >= SPIN_TIME:
@@ -142,23 +131,6 @@ def mainloop(screen, clock):
         pygame.display.flip()
         delta_time = clock.tick(GAME_FPS)
     pygame.quit()
-
-
-# class Sloth(arcade.Window):
-#     """
-#     Sloth Slot Machine Game
-#     """
-
-#     def __init__(self, w, h, t):
-#         super().__init__(w, h, t, vsync=True)
-#         self.antialiasing = True
-#         self.samples = 16
-#         arcade.set_background_color(colors.WHITE)
-#         self.spin_timer = 0
-
-
-    def on_update(self, delta_time: float):
-        self.strip1.on_update(delta_time)
 
 
 if __name__ == "__main__":
