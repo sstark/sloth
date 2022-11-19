@@ -9,9 +9,9 @@ SPR_HEIGHT = 60
 SPR_SPACE_X = 20
 SPR_SPACE_Y = 15
 # number of Picts in a wheel
-WHEEL_LENGTH = 8
+WHEEL_LENGTH = 50
 STOP_TIME = 550
-SPIN_VELOCITY = 5
+SPIN_VELOCITY = 50
 GAME_FPS = 60
 GAME_RES = (800, 600)
 
@@ -46,7 +46,6 @@ class Wheel(pygame.sprite.Group):
         self.is_stopping = False
         self.stop_timer = 0.0
         self.velocity = 0.0
-        self.height = 600
         self.spin_timer = 0
         self.spin_duration = spin_duration
         self.spritelist = []
@@ -85,15 +84,15 @@ class Wheel(pygame.sprite.Group):
                 cur_v = self.get_velocity()
                 steps = STOP_TIME / delta_time
                 self.set_velocity(cur_v - SPIN_VELOCITY / steps)
+
         for spr in self.sprites():
-            spr_pos = spr.update(self.get_velocity())
-            if spr_pos.y > 600-30:
-                top_y = self.spritelist[0].rect.y
-                new_y = top_y - (SPR_HEIGHT + SPR_SPACE_Y)
-                print("wrap:", spr_pos, top_y, new_y, len(self.spritelist))
-                spr.rect.y = new_y
-                self.spritelist.pop()
-                self.spritelist.insert(0, spr)
+            spr.update(self.get_velocity())
+
+        if self.spritelist[0].rect.y > SPR_HEIGHT: 
+            last_sprite = self.spritelist[-1]
+            last_sprite.rect.y = 0
+            self.spritelist.insert(0, last_sprite)
+            self.spritelist.pop()
 
 
     def set_x(self, x):
