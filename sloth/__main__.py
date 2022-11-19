@@ -108,9 +108,9 @@ class Wheel(pygame.sprite.Group):
 
         # If there is enough space on the top, move the last element up
         # This way the wheel appears circular.
-        if self.spritelist[0].rect.y > SPR_HEIGHT: 
+        if self.spritelist[0].rect.y >= SPR_HEIGHT + SPR_SPACE_Y: 
             last_sprite = self.spritelist[-1]
-            last_sprite.rect.y = 0
+            last_sprite.rect.y = self.spritelist[0].rect.y - (SPR_HEIGHT + SPR_SPACE_Y)
             self.spritelist.insert(0, last_sprite)
             self.spritelist.pop()
 
