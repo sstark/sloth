@@ -5,19 +5,20 @@ import random
 import sys
 
 SCREEN_TITLE = "Sloth"
-SPR_WIDTH = 60
-SPR_HEIGHT = 60
-SPR_SPACE_X = 20
-SPR_SPACE_Y = 15
+SPR_WIDTH = 120
+SPR_HEIGHT = 120
+SPR_SPACE_X = 30
+SPR_SPACE_Y = 25
 # number of Picts in a wheel
 WHEEL_LENGTH = 50
 STOP_TIME = 550
-SPIN_VELOCITY = 50
+SPIN_VELOCITY = 80
 # how exact do we want to snap back the wheel
-SNAP_SPACE = 3
-SNAP_VELOCITY = -3
+SNAP_SPACE = 10
+SNAP_VELOCITY = -10
 GAME_FPS = 60
-GAME_RES = (800, 600)
+GAME_WIDTH = 1920
+GAME_HEIGHT = 1080
 
 
 class Pict(pygame.sprite.Sprite):
@@ -164,7 +165,7 @@ def mainloop(screen, clock):
     running = True
     # frame_path = pathlib.Path("images", "frame.png")
     # frame = pygame.image.load(frame_path)
-    wheels_x_pos = (800 - ((5*SPR_WIDTH) + (4*SPR_SPACE_X))) / 2
+    wheels_x_pos = (GAME_WIDTH - ((5*SPR_WIDTH) + (4*SPR_SPACE_X))) / 2
     wm = WheelManager(wheels_x_pos)
     wm.insert_new_wheel(spin_duration=1000)
     wm.insert_new_wheel(spin_duration=1300)
@@ -201,6 +202,6 @@ if __name__ == "__main__":
     pygame.init()
     # flags = pygame.FULLSCREEN | pygame.DOUBLEBUF
     flags = pygame.DOUBLEBUF
-    screen = pygame.display.set_mode(GAME_RES, flags, vsync=1)
+    screen = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), flags, vsync=True)
     clock = pygame.time.Clock()
     mainloop(screen, clock)
