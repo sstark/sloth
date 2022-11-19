@@ -6,6 +6,7 @@ import random
 SCREEN_TITLE = "Sloth"
 SPR_WIDTH = 60
 SPR_HEIGHT = 60
+SPR_SPACE_X = 20
 SPR_SPACE_Y = 15
 # number of Picts in a wheel
 WHEEL_LENGTH = 50
@@ -47,6 +48,7 @@ class Wheel(pygame.sprite.Group):
         self.stop_timer = 0.0
         self.velocity = 0.0
         self.height = 600
+        self.spin_timer = 0
 
         symbol_path = pathlib.Path("images", "pictures")
         symbols = list(symbol_path.glob("*.png"))
@@ -84,50 +86,69 @@ class Wheel(pygame.sprite.Group):
         for spr in self.sprites():
             spr.update(self.get_velocity())
 
+    def set_x(self, x):
+        for spr in self.sprites():
+            spr.rect.x = x
+
+
+class WheelManager():
+    """
+    A group of wheels
+    """
+
+    def __init__(self, pos_x):
+        self.wheels = []
+        self.pos_x = pos_x
+        w_pixel_length = WHEEL_LENGTH * (SPR_HEIGHT + SPR_SPACE_Y)
+        self.pos_y = - w_pixel_length + 600
+
+    def insert_new_wheel(self, pos=999):
+        if pos > len(self.wheels):
+            pos = len(self.wheels)
+        x = self.pos_x + (pos+1) * (SPR_WIDTH + SPR_SPACE_X)
+        self.wheels.insert(pos, Wheel(x, self.pos_y, WHEEL_LENGTH))
+        self.reorder()
+
+    def reorder(self):
+        for i, wheel in enumerate(self.wheels):
+            wheel.set_x(self.pos_x + (i+1) * (SPR_WIDTH + SPR_SPACE_X))
+
+    def update(self, delta_time):
+        for wheel in self.wheels:
+            wheel.update(delta_time)
+
+    def spin_all(self):
+        for wheel in self.wheels:
+            wheel.spin()
+
+    def draw(self, surface):
+        for wheel in self.wheels:
+            wheel.draw(surface)
+
 
 def mainloop(screen, clock):
     delta_time = 0
     running = True
-    spin_timer1 = 0
-    spin_timer2 = 0
-    spin_timer3 = 0
-    # initial y position of the wheel
-    w_pixel_length = WHEEL_LENGTH * (SPR_HEIGHT + SPR_SPACE_Y)
-    w_y_pos = - w_pixel_length + 600
-    wheel1 = Wheel(300, w_y_pos, WHEEL_LENGTH)
-    wheel2 = Wheel(300+SPR_WIDTH, w_y_pos, WHEEL_LENGTH)
-    wheel3 = Wheel(300+2*SPR_WIDTH, w_y_pos, WHEEL_LENGTH)
+    wm = WheelManager(200)
+    wm.insert_new_wheel()
+    wm.insert_new_wheel()
+    wm.insert_new_wheel()
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    wheel1.spin()
-                    wheel2.spin()
-                    wheel3.spin()
+                    wm.spin_all()
         screen.fill((0,0,0))
-        if wheel1.is_spinning:
-            spin_timer1 += delta_time
-            if spin_timer1 >= SPIN_TIME:
-                spin_timer1 = 0
-                wheel1.stop()
-        if wheel2.is_spinning:
-            spin_timer2 += delta_time
-            if spin_timer2 >= SPIN_TIME:
-                spin_timer2 = 0
-                wheel2.stop()
-        if wheel3.is_spinning:
-            spin_timer3 += delta_time
-            if spin_timer3 >= SPIN_TIME:
-                spin_timer3 = 0
-                wheel3.stop()
-        wheel1.update(delta_time)
-        wheel2.update(delta_time)
-        wheel3.update(delta_time)
-        wheel1.draw(screen)
-        wheel2.draw(screen)
-        wheel3.draw(screen)
+        for wheel in wm.wheels:
+            if wheel.is_spinning:
+                wheel.spin_timer += delta_time
+                if wheel.spin_timer >= SPIN_TIME:
+                    wheel.spin_timer = 0
+                    wheel.stop()
+        wm.update(delta_time)
+        wm.draw(screen)
         pygame.display.flip()
         delta_time = clock.tick(GAME_FPS)
     pygame.quit()
