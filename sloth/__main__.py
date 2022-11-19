@@ -66,6 +66,7 @@ class Wheel(pygame.sprite.Group):
         return self.velocity
 
     def spin(self):
+        self.stop_timer = 0.0
         self.is_spinning = True
         self.set_velocity(SPIN_VELOCITY)
 
@@ -134,6 +135,11 @@ class WheelManager():
         for wheel in self.wheels:
             wheel.draw(surface)
 
+    def is_spinning(self):
+        for wheel in self.wheels:
+            if wheel.is_spinning:
+                return True
+
 
 def mainloop(screen, clock):
     delta_time = 0
@@ -148,7 +154,8 @@ def mainloop(screen, clock):
                 running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    wm.spin_all()
+                    if not wm.is_spinning():
+                        wm.spin_all()
         screen.fill((0,0,0))
         for wheel in wm.wheels:
             if wheel.is_spinning:
