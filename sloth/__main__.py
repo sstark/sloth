@@ -5,20 +5,29 @@ import random
 import sys
 
 SCREEN_TITLE = "Sloth"
-SPR_WIDTH = 120
-SPR_HEIGHT = 120
-SPR_SPACE_X = 30
-SPR_SPACE_Y = 25
-# number of Picts in a wheel
-WHEEL_LENGTH = 50
-STOP_TIME = 550
-SPIN_VELOCITY = 80
-# how exact do we want to snap back the wheel
-SNAP_SPACE = 10
-SNAP_VELOCITY = -10
 GAME_FPS = 60
 GAME_WIDTH = 1920
 GAME_HEIGHT = 1080
+#
+# Wheels frame inner border for a 1920x1080 screen
+# and a 5x4 wheelset:
+#
+#   x = 450, 1470
+#   y = 180,  900
+#
+# If those are changed, the frame needs to be adjusted
+SPR_WIDTH = 180
+SPR_HEIGHT = 160
+SPR_SPACE_X = 30
+SPR_SPACE_Y = 20
+# Number of Picts in a wheel
+WHEEL_LENGTH = 50
+# Those need to potentially be adjusted on major resolution changes
+STOP_TIME = 550
+SPIN_VELOCITY = 80
+# How exact do we want to snap back the wheel
+SNAP_SPACE = 10
+SNAP_VELOCITY = -10
 
 
 class Pict(pygame.sprite.Sprite):
