@@ -13,6 +13,9 @@ SPR_SPACE_Y = 15
 WHEEL_LENGTH = 50
 STOP_TIME = 550
 SPIN_VELOCITY = 50
+# how exact do we want to snap back the wheel
+SNAP_SPACE = 3
+SNAP_VELOCITY = -3
 GAME_FPS = 60
 GAME_RES = (800, 600)
 
@@ -45,6 +48,7 @@ class Wheel(pygame.sprite.Group):
         self.pos_y = pos_y
         self.is_spinning = False
         self.is_stopping = False
+        self.is_snapping_back = False
         self.stop_timer = 0.0
         self.velocity = 0.0
         self.spin_timer = 0
@@ -76,20 +80,34 @@ class Wheel(pygame.sprite.Group):
         self.stop_timer = 0.0
 
     def update(self, delta_time):
-        if self.is_stopping and self.is_spinning:
+        if self.is_stopping and self.is_spinning and not self.is_snapping_back:
             self.stop_timer += delta_time
             if self.stop_timer >= STOP_TIME:
-                self.is_spinning = False
                 self.is_stopping = False
                 self.set_velocity(0)
+                self.is_snapping_back = True
             else:
+                # Soft stop
                 cur_v = self.get_velocity()
                 steps = STOP_TIME / delta_time
                 self.set_velocity(cur_v - SPIN_VELOCITY / steps)
 
+        if self.is_spinning and not self.is_stopping and self.is_snapping_back:
+            top_y = self.spritelist[0].rect.y
+            # Slowly snap back to a nice position
+            if top_y > SNAP_SPACE:
+                snap_gap = top_y - SNAP_SPACE
+                self.set_velocity(max(SNAP_VELOCITY, - snap_gap/2))
+            else:
+                self.set_velocity(0)
+                self.is_snapping_back = False
+                self.is_spinning = False
+
         for spr in self.sprites():
             spr.update(self.get_velocity())
 
+        # If there is enough space on the top, move the last element up
+        # This way the wheel appears circular.
         if self.spritelist[0].rect.y > SPR_HEIGHT: 
             last_sprite = self.spritelist[-1]
             last_sprite.rect.y = 0
