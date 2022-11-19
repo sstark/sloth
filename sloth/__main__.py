@@ -45,6 +45,7 @@ class Wheel(pygame.sprite.Group):
 
     def __init__(self, pos_x, pos_y, num, spin_duration):
         super().__init__()
+        self.pos_x = pos_x
         self.pos_y = pos_y
         self.is_spinning = False
         self.is_stopping = False
@@ -59,8 +60,7 @@ class Wheel(pygame.sprite.Group):
         symbols = list(symbol_path.glob("*.png"))
         for i, sym in enumerate(random.choices(symbols, k=num)):
             y = self.pos_y + i * SPR_HEIGHT + i * SPR_SPACE_Y
-            p = Pict(sym, pos_x, y)
-            # p.scale = SPR_WIDTH / p.width
+            p = Pict(sym, self.pos_x, y)
             self.spritelist.append(p)
             self.add(p)
 
@@ -133,13 +133,13 @@ class WheelManager():
     def insert_new_wheel(self, pos=999, spin_duration=500):
         if pos > len(self.wheels):
             pos = len(self.wheels)
-        x = self.pos_x + (pos+1) * (SPR_WIDTH + SPR_SPACE_X)
+        x = self.pos_x + pos * (SPR_WIDTH + SPR_SPACE_X)
         self.wheels.insert(pos, Wheel(x, self.pos_y, WHEEL_LENGTH, spin_duration))
         self.reorder()
 
     def reorder(self):
         for i, wheel in enumerate(self.wheels):
-            wheel.set_x(self.pos_x + (i+1) * (SPR_WIDTH + SPR_SPACE_X))
+            wheel.set_x(self.pos_x + i * (SPR_WIDTH + SPR_SPACE_X))
 
     def update(self, delta_time):
         for wheel in self.wheels:
@@ -162,10 +162,15 @@ class WheelManager():
 def mainloop(screen, clock):
     delta_time = 0
     running = True
-    wm = WheelManager(200)
-    wm.insert_new_wheel(spin_duration=1500)
+    # frame_path = pathlib.Path("images", "frame.png")
+    # frame = pygame.image.load(frame_path)
+    wheels_x_pos = (800 - ((5*SPR_WIDTH) + (4*SPR_SPACE_X))) / 2
+    wm = WheelManager(wheels_x_pos)
+    wm.insert_new_wheel(spin_duration=1000)
+    wm.insert_new_wheel(spin_duration=1300)
+    wm.insert_new_wheel(spin_duration=1600)
     wm.insert_new_wheel(spin_duration=1900)
-    wm.insert_new_wheel(spin_duration=2300)
+    wm.insert_new_wheel(spin_duration=2200)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -185,6 +190,7 @@ def mainloop(screen, clock):
                     wheel.stop()
         wm.update(delta_time)
         wm.draw(screen)
+        # screen.blit(frame, (0, 0))
         pygame.display.flip()
         delta_time = clock.tick(GAME_FPS)
     pygame.quit()
