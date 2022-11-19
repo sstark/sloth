@@ -9,9 +9,9 @@ SPR_HEIGHT = 60
 SPR_SPACE_X = 20
 SPR_SPACE_Y = 15
 # number of Picts in a wheel
-WHEEL_LENGTH = 70
-STOP_TIME = 250
-SPIN_VELOCITY = 50
+WHEEL_LENGTH = 8
+STOP_TIME = 550
+SPIN_VELOCITY = 5
 GAME_FPS = 60
 GAME_RES = (800, 600)
 
@@ -31,6 +31,7 @@ class Pict(pygame.sprite.Sprite):
 
     def update(self, velocity):
         self.rect.y += velocity
+        return self.rect
 
 
 class Wheel(pygame.sprite.Group):
@@ -48,6 +49,7 @@ class Wheel(pygame.sprite.Group):
         self.height = 600
         self.spin_timer = 0
         self.spin_duration = spin_duration
+        self.spritelist = []
 
         symbol_path = pathlib.Path("images", "pictures")
         symbols = list(symbol_path.glob("*.png"))
@@ -55,6 +57,7 @@ class Wheel(pygame.sprite.Group):
             y = self.pos_y + i * SPR_HEIGHT + i * SPR_SPACE_Y
             p = Pict(sym, pos_x, y)
             # p.scale = SPR_WIDTH / p.width
+            self.spritelist.append(p)
             self.add(p)
 
     def set_velocity(self, velocity):
@@ -83,7 +86,15 @@ class Wheel(pygame.sprite.Group):
                 steps = STOP_TIME / delta_time
                 self.set_velocity(cur_v - SPIN_VELOCITY / steps)
         for spr in self.sprites():
-            spr.update(self.get_velocity())
+            spr_pos = spr.update(self.get_velocity())
+            if spr_pos.y > 600-30:
+                top_y = self.spritelist[0].rect.y
+                new_y = top_y - (SPR_HEIGHT + SPR_SPACE_Y)
+                print("wrap:", spr_pos, top_y, new_y, len(self.spritelist))
+                spr.rect.y = new_y
+                self.spritelist.pop()
+                self.spritelist.insert(0, spr)
+
 
     def set_x(self, x):
         for spr in self.sprites():
@@ -129,9 +140,9 @@ def mainloop(screen, clock):
     delta_time = 0
     running = True
     wm = WheelManager(200)
-    wm.insert_new_wheel(spin_duration=500)
-    wm.insert_new_wheel(spin_duration=900)
-    wm.insert_new_wheel(spin_duration=1300)
+    wm.insert_new_wheel(spin_duration=1500)
+    wm.insert_new_wheel(spin_duration=1900)
+    wm.insert_new_wheel(spin_duration=2300)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
