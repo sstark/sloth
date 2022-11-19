@@ -2,6 +2,7 @@
 import pygame
 import pathlib
 import random
+import sys
 
 SCREEN_TITLE = "Sloth"
 SPR_WIDTH = 60
@@ -156,6 +157,8 @@ def mainloop(screen, clock):
                 if event.key == pygame.K_SPACE:
                     if not wm.is_spinning():
                         wm.spin_all()
+                if event.key == pygame.K_ESCAPE:
+                    sys.exit(0)
         screen.fill((0,0,0))
         for wheel in wm.wheels:
             if wheel.is_spinning:
