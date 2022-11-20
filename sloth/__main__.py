@@ -87,9 +87,11 @@ class Wheel(pygame.sprite.Group):
 
     def stop(self):
         self.is_stopping = True
+        self.is_snapping_back = False
         self.stop_timer = 0.0
 
     def update(self, delta_time):
+        # print("is_spinning:", self.is_spinning, "is_stopping:", self.is_stopping, "is_snapping_back:", self.is_snapping_back)
         if self.is_stopping and self.is_spinning and not self.is_snapping_back:
             self.stop_timer += delta_time
             if self.stop_timer >= STOP_TIME:
@@ -168,6 +170,13 @@ class WheelManager():
             if wheel.is_spinning:
                 return True
 
+    def force_stop_all(self):
+        for wheel in self.wheels:
+            if wheel.is_spinning:
+                wheel.spin_timer = 0
+                wheel.is_snapping_back = True
+                wheel.is_stopping = False
+
 
 def mainloop(screen, clock):
     delta_time = 0
@@ -189,6 +198,8 @@ def mainloop(screen, clock):
                 if event.key == pygame.K_SPACE:
                     if not wm.is_spinning():
                         wm.spin_all()
+                    else:
+                        wm.force_stop_all()
                 if event.key == pygame.K_ESCAPE:
                     sys.exit(0)
         screen.fill((0,0,0))
