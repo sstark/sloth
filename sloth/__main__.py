@@ -157,6 +157,8 @@ class WheelManager():
         self.wheels = []
         self.pos_y = 0
         self.is_evaluating = False
+        self.is_presenting_matches = False
+        self.winning_lines = {}
 
     def insert_new_wheel(self, pos=999, spin_duration=500):
         if pos > len(self.wheels):
@@ -185,30 +187,41 @@ class WheelManager():
             print("evaluating")
             # This will contain the index of the winline
             # and the corresponding number of matching picts
-            winning_lines = {}
             for i, winline in enumerate(WINLINES):
                 # Get the first pict of the winline
                 match_pict = self.get_pict_at(0, winline[0])
                 print("matching:", match_pict.image_name)
                 print("winline:", i, winline)
-                winning_lines[i] = 1
+                self.winning_lines[i] = 1
                 # Go through the rest of the winline
                 for x, y in enumerate(winline[1:]):
                     next_pict = self.get_pict_at(x+1, y)
                     print(next_pict.image_name)
                     if next_pict.image_name == match_pict.image_name:
                         print("found match:", x, y)
-                        winning_lines[i] += 1
+                        self.winning_lines[i] += 1
                     else:
                         break
-            print(winning_lines)
+            print(self.winning_lines)
             self.is_evaluating = False
+            self.is_presenting_matches = True
+
+        if self.is_presenting_matches:
+            for winline, wins in self.winning_lines.items():
+                if wins > 1:
+                    for x in range(wins):
+                        y = WINLINES[winline][x]
+                        highlight_pict = self.get_pict_at(x, y)
+                        pygame.draw.rect(highlight_pict.image,
+                                         (255, 0, 0),
+                                         [0, 0, SPR_WIDTH, SPR_HEIGHT], 3)
 
         for wheel in self.wheels:
             wheel.update(delta_time)
 
     def spin_all(self):
         self.is_evaluating = False
+        self.is_presenting_matches = False
         for wheel in self.wheels:
             wheel.spin()
 
