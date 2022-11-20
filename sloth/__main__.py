@@ -217,6 +217,11 @@ class WheelManager():
                                          [0, 0, SPR_WIDTH, SPR_HEIGHT], 3)
 
         for wheel in self.wheels:
+            if wheel.is_spinning:
+                wheel.spin_timer += delta_time
+                if wheel.spin_timer >= wheel.spin_duration:
+                    wheel.spin_timer = 0
+                    wheel.stop()
             wheel.update(delta_time)
 
     def spin_all(self):
@@ -270,12 +275,6 @@ def mainloop(screen, clock):
             if event.type == EV_DONE_SPINNING:
                 if not wm.is_spinning():
                     wm.evaluate()
-        for wheel in wm.wheels:
-            if wheel.is_spinning:
-                wheel.spin_timer += delta_time
-                if wheel.spin_timer >= wheel.spin_duration:
-                    wheel.spin_timer = 0
-                    wheel.stop()
         wm.update(delta_time)
         wheel_surf.fill((0,0,0))
         wm.draw(wheel_surf)
