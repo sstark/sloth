@@ -29,6 +29,21 @@ SPIN_VELOCITY = 80
 SNAP_SPACE = 10
 SNAP_VELOCITY = -10
 
+EV_DONE_SPINNING = pygame.USEREVENT + 1
+
+# Win lines. Only the y coordinate is given
+WINLINES = [
+    # Straight lines
+    [0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1],
+    [2, 2, 2, 2, 2],
+    [3, 3, 3, 3, 3],
+    # Triangles
+    [0, 1, 2, 1, 0],
+    [1, 2, 3, 2, 1],
+    [2, 1, 0, 1, 2],
+    [3, 2, 1, 2, 3],
+]
 
 class Pict(pygame.sprite.Sprite):
     """
@@ -37,6 +52,7 @@ class Pict(pygame.sprite.Sprite):
 
     def __init__(self, img, init_x, init_y):
         super().__init__()
+        self.image_name = img
         self.image = pygame.image.load(img)
         self.image = pygame.transform.scale(self.image, (SPR_WIDTH, SPR_HEIGHT))
         self.rect = self.image.get_rect()
@@ -114,6 +130,7 @@ class Wheel(pygame.sprite.Group):
                 self.set_velocity(0)
                 self.is_snapping_back = False
                 self.is_spinning = False
+                pygame.event.post(pygame.event.Event(EV_DONE_SPINNING))
 
         for spr in self.sprites():
             spr.update(self.get_velocity())
@@ -125,7 +142,6 @@ class Wheel(pygame.sprite.Group):
             last_sprite.rect.y = self.spritelist[0].rect.y - (SPR_HEIGHT + SPR_SPACE_Y)
             self.spritelist.insert(0, last_sprite)
             self.spritelist.pop()
-
 
     def set_x(self, x):
         for spr in self.sprites():
@@ -140,6 +156,7 @@ class WheelManager():
     def __init__(self):
         self.wheels = []
         self.pos_y = 0
+        self.is_evaluating = False
 
     def insert_new_wheel(self, pos=999, spin_duration=500):
         if pos > len(self.wheels):
@@ -152,11 +169,46 @@ class WheelManager():
         for i, wheel in enumerate(self.wheels):
             wheel.set_x(i * (SPR_WIDTH + SPR_SPACE_X))
 
+    def get_pict_at(self, x, y):
+        '''
+        Return the pict at position y of wheel x,
+        counted from upper left of the visible wheel area.
+        Flaky.
+        '''
+        return self.wheels[x].spritelist[y]
+
+    def evaluate(self):
+        self.is_evaluating = True
+
     def update(self, delta_time):
+        if self.is_evaluating:
+            print("evaluating")
+            # This will contain the index of the winline
+            # and the corresponding number of matching picts
+            winning_lines = {}
+            for i, winline in enumerate(WINLINES):
+                # Get the first pict of the winline
+                match_pict = self.get_pict_at(0, winline[0])
+                print("matching:", match_pict.image_name)
+                print("winline:", i, winline)
+                winning_lines[i] = 1
+                # Go through the rest of the winline
+                for x, y in enumerate(winline[1:]):
+                    next_pict = self.get_pict_at(x+1, y)
+                    print(next_pict.image_name)
+                    if next_pict.image_name == match_pict.image_name:
+                        print("found match:", x, y)
+                        winning_lines[i] += 1
+                    else:
+                        break
+            print(winning_lines)
+            self.is_evaluating = False
+
         for wheel in self.wheels:
             wheel.update(delta_time)
 
     def spin_all(self):
+        self.is_evaluating = False
         for wheel in self.wheels:
             wheel.spin()
 
@@ -202,6 +254,9 @@ def mainloop(screen, clock):
                         wm.force_stop_all()
                 if event.key == pygame.K_ESCAPE:
                     sys.exit(0)
+            if event.type == EV_DONE_SPINNING:
+                if not wm.is_spinning():
+                    wm.evaluate()
         for wheel in wm.wheels:
             if wheel.is_spinning:
                 wheel.spin_timer += delta_time
