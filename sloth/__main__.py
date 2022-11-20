@@ -137,21 +137,20 @@ class WheelManager():
     A group of wheels
     """
 
-    def __init__(self, pos_x):
+    def __init__(self):
         self.wheels = []
-        self.pos_x = pos_x
         self.pos_y = 0
 
     def insert_new_wheel(self, pos=999, spin_duration=500):
         if pos > len(self.wheels):
             pos = len(self.wheels)
-        x = self.pos_x + pos * (SPR_WIDTH + SPR_SPACE_X)
+        x = pos * (SPR_WIDTH + SPR_SPACE_X)
         self.wheels.insert(pos, Wheel(x, self.pos_y, WHEEL_LENGTH, spin_duration))
         self.reorder()
 
     def reorder(self):
         for i, wheel in enumerate(self.wheels):
-            wheel.set_x(self.pos_x + i * (SPR_WIDTH + SPR_SPACE_X))
+            wheel.set_x(i * (SPR_WIDTH + SPR_SPACE_X))
 
     def update(self, delta_time):
         for wheel in self.wheels:
@@ -183,8 +182,9 @@ def mainloop(screen, clock):
     running = True
     # frame_path = pathlib.Path("images", "frame.png")
     # frame = pygame.image.load(frame_path)
+    wheel_surf = pygame.Surface((1020, 720))
     wheels_x_pos = (GAME_WIDTH - ((5*SPR_WIDTH) + (4*SPR_SPACE_X))) / 2
-    wm = WheelManager(wheels_x_pos)
+    wm = WheelManager()
     wm.insert_new_wheel(spin_duration=1000)
     wm.insert_new_wheel(spin_duration=1300)
     wm.insert_new_wheel(spin_duration=1600)
@@ -202,7 +202,6 @@ def mainloop(screen, clock):
                         wm.force_stop_all()
                 if event.key == pygame.K_ESCAPE:
                     sys.exit(0)
-        screen.fill((0,0,0))
         for wheel in wm.wheels:
             if wheel.is_spinning:
                 wheel.spin_timer += delta_time
@@ -210,7 +209,9 @@ def mainloop(screen, clock):
                     wheel.spin_timer = 0
                     wheel.stop()
         wm.update(delta_time)
-        wm.draw(screen)
+        wheel_surf.fill((0,0,0))
+        wm.draw(wheel_surf)
+        screen.blit(wheel_surf, (wheels_x_pos, 180))
         # screen.blit(frame, (0, 0))
         pygame.display.flip()
         delta_time = clock.tick(GAME_FPS)
