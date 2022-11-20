@@ -158,6 +158,8 @@ class WheelManager():
         self.pos_y = 0
         self.is_evaluating = False
         self.is_presenting_matches = False
+        # This will contain the index of the winline
+        # and the corresponding number of matching picts
         self.winning_lines = {}
 
     def insert_new_wheel(self, pos=999, spin_duration=500):
@@ -185,8 +187,6 @@ class WheelManager():
     def update(self, delta_time):
         if self.is_evaluating:
             print("evaluating")
-            # This will contain the index of the winline
-            # and the corresponding number of matching picts
             for i, winline in enumerate(WINLINES):
                 # Get the first pict of the winline
                 match_pict = self.get_pict_at(0, winline[0])
