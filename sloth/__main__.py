@@ -281,15 +281,14 @@ def mainloop(screen, clock):
         screen.blit(wheel_surf, (wheels_x_pos, 180))
         # screen.blit(frame, (0, 0))
         pygame.display.flip()
-        delta_time = clock.tick(GAME_FPS)
+        delta_time = clock.tick()
     pygame.quit()
 
 
 if __name__ == "__main__":
 
     pygame.init()
-    # flags = pygame.FULLSCREEN | pygame.DOUBLEBUF
-    flags = pygame.DOUBLEBUF
+    flags = pygame.DOUBLEBUF | pygame.SCALED
     screen = pygame.display.set_mode((GAME_WIDTH, GAME_HEIGHT), flags, vsync=True)
     clock = pygame.time.Clock()
     mainloop(screen, clock)
