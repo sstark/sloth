@@ -1,6 +1,6 @@
 
-Sloth - A Lazy Slot Machine
-===========================
+🦥Sloth - A Lazy Slot Machine
+=============================
 
 Run:
 

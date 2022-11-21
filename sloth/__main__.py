@@ -54,7 +54,7 @@ class Pict(pygame.sprite.Sprite):
         super().__init__()
         self.image_name = img
         self.image = pygame.image.load(img)
-        self.image = pygame.transform.scale(self.image, (SPR_WIDTH, SPR_HEIGHT))
+        self.image = pygame.transform.smoothscale(self.image, (SPR_WIDTH, SPR_HEIGHT))
         self.rect = self.image.get_rect()
         self.rect.x = init_x
         self.rect.y = init_y
