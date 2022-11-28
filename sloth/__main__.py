@@ -28,6 +28,8 @@ SPIN_VELOCITY = 80
 # How exact do we want to snap back the wheel
 SNAP_SPACE = 10
 SNAP_VELOCITY = -10
+# How long to show the win overlay
+WINOVERLAY_TIME = 100
 
 EV_DONE_SPINNING = pygame.USEREVENT + 1
 
@@ -53,16 +55,25 @@ class Pict(pygame.sprite.Sprite):
     def __init__(self, img, init_x, init_y):
         super().__init__()
         self.image_name = img
-        self.image = pygame.image.load(img)
-        self.image = pygame.transform.smoothscale(self.image, (SPR_WIDTH, SPR_HEIGHT))
-        self.rect = self.image.get_rect()
+        self.image0 = pygame.image.load(img)
+        self.image0 = pygame.transform.smoothscale(self.image0, (SPR_WIDTH, SPR_HEIGHT))
+        self.rect = self.image0.get_rect()
         self.rect.x = init_x
         self.rect.y = init_y
+        self.image = self.image0
+        self.winoverlay = self.image.copy()
+        pygame.draw.rect(self.winoverlay,
+                         (255, 0, 0),
+                         [0, 0, SPR_WIDTH, SPR_HEIGHT], 3)
 
     def update(self, velocity):
         self.rect.y += velocity
-        return self.rect
 
+    def mark(self):
+        self.image = self.winoverlay
+
+    def unmark(self):
+        self.image = self.image0
 
 class Wheel(pygame.sprite.Group):
     """
@@ -161,6 +172,8 @@ class WheelManager():
         # This will contain the index of the winline
         # and the corresponding number of matching picts
         self.winning_lines = {}
+        self.wingroup = pygame.sprite.Group()
+        self.winmark_counter = 0.0
 
     def insert_new_wheel(self, pos=999, spin_duration=500):
         if pos > len(self.wheels):
@@ -184,37 +197,57 @@ class WheelManager():
     def evaluate(self):
         self.is_evaluating = True
 
+    def find_winlines(self):
+        self.winning_lines = {}
+        for i, winline in enumerate(WINLINES):
+            # Get the first pict of the winline
+            match_pict = self.get_pict_at(0, winline[0])
+            print("matching:", match_pict.image_name)
+            print("winline:", i, winline)
+            self.winning_lines[i] = 1
+            # Go through the rest of the winline
+            for x, y in enumerate(winline[1:]):
+                next_pict = self.get_pict_at(x+1, y)
+                print(next_pict.image_name)
+                if next_pict.image_name == match_pict.image_name:
+                    print("found match:", x, y)
+                    self.winning_lines[i] += 1
+                else:
+                    break
+
+    def make_wingroup(self):
+        for winline, wins in self.winning_lines.items():
+            if wins > 1:
+                for x in range(wins):
+                    y = WINLINES[winline][x]
+                    self.wingroup.add(self.get_pict_at(x, y))
+
     def update(self, delta_time):
         if self.is_evaluating:
             print("evaluating")
-            for i, winline in enumerate(WINLINES):
-                # Get the first pict of the winline
-                match_pict = self.get_pict_at(0, winline[0])
-                print("matching:", match_pict.image_name)
-                print("winline:", i, winline)
-                self.winning_lines[i] = 1
-                # Go through the rest of the winline
-                for x, y in enumerate(winline[1:]):
-                    next_pict = self.get_pict_at(x+1, y)
-                    print(next_pict.image_name)
-                    if next_pict.image_name == match_pict.image_name:
-                        print("found match:", x, y)
-                        self.winning_lines[i] += 1
-                    else:
-                        break
+            self.find_winlines()
             print(self.winning_lines)
             self.is_evaluating = False
             self.is_presenting_matches = True
 
         if self.is_presenting_matches:
-            for winline, wins in self.winning_lines.items():
-                if wins > 1:
-                    for x in range(wins):
-                        y = WINLINES[winline][x]
-                        highlight_pict = self.get_pict_at(x, y)
-                        pygame.draw.rect(highlight_pict.image,
-                                         (255, 0, 0),
-                                         [0, 0, SPR_WIDTH, SPR_HEIGHT], 3)
+            print(self.winmark_counter)
+            self.make_wingroup()
+            if self.winmark_counter == 0.0:
+                for spr in self.wingroup:
+                    spr.mark()
+                    print("mark")
+                print(len(self.wingroup))
+            self.winmark_counter += 1
+            if self.winmark_counter > WINOVERLAY_TIME:
+                for spr in self.wingroup:
+                    print("unmark")
+                    print(spr)
+                    spr.unmark()
+                    self.wingroup.remove(spr)
+                self.winmark_counter = 0.0
+                self.is_presenting_matches = False
+                print(len(self.wingroup))
 
         for wheel in self.wheels:
             if wheel.is_spinning:
