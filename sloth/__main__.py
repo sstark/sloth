@@ -63,6 +63,10 @@ class Pict(pygame.sprite.Sprite):
     def __init__(self, img, init_x, init_y):
         super().__init__()
         self.image_name = img
+        if self.image_name.name.startswith("j-"):
+            self.is_joker = True
+        else:
+            self.is_joker = False
         self.image0 = pygame.image.load(img)
         self.image0 = pygame.transform.smoothscale(self.image0, (SPR_WIDTH, SPR_HEIGHT))
         self.rect = self.image0.get_rect()
@@ -82,6 +86,7 @@ class Pict(pygame.sprite.Sprite):
 
     def unmark(self):
         self.image = self.image0
+
 
 class Wheel(pygame.sprite.Group):
     """
@@ -217,7 +222,7 @@ class WheelManager():
             for x, y in enumerate(winline[1:]):
                 next_pict = self.get_pict_at(x+1, y)
                 print(next_pict.image_name)
-                if next_pict.image_name == match_pict.image_name:
+                if next_pict.image_name == match_pict.image_name or next_pict.is_joker:
                     print("found match:", x, y)
                     self.winning_lines[i] += 1
                 else:
