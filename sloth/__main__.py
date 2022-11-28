@@ -236,6 +236,7 @@ class WheelManager():
             self.find_winlines()
             print(self.winning_lines)
             self.is_evaluating = False
+            self.winmark_counter = 0.0
             self.is_presenting_matches = True
 
         if self.is_presenting_matches:
