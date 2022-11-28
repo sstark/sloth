@@ -29,7 +29,7 @@ SPIN_VELOCITY = 80
 SNAP_SPACE = 10
 SNAP_VELOCITY = -10
 # How long to show the win overlay
-WINOVERLAY_TIME = 100
+WINOVERLAY_TIME = 300
 
 EV_DONE_SPINNING = pygame.USEREVENT + 1
 
@@ -234,7 +234,7 @@ class WheelManager():
 
     def make_wingroup(self):
         for winline, wins in self.winning_lines.items():
-            if wins > 1:
+            if wins > 2:
                 for x in range(wins):
                     y = WINLINES[winline][x]
                     self.wingroup.add(self.get_pict_at(x, y))
