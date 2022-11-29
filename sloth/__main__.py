@@ -219,6 +219,8 @@ class WheelManager():
         for i, winline in enumerate(WINLINES):
             # Get the first pict of the winline
             match_pict = self.get_pict_at(0, winline[0])
+            if match_pict.is_joker:
+                continue
             print("matching:", match_pict.image_name)
             print("winline:", i, winline)
             self.winning_lines[i] = 1
