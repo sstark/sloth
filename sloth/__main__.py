@@ -250,8 +250,8 @@ class WheelManager():
 
         if self.is_presenting_matches:
             print(self.winmark_counter)
-            self.make_wingroup()
             if self.winmark_counter == 0.0:
+                self.make_wingroup()
                 for spr in self.wingroup:
                     spr.mark()
                     print("mark")
