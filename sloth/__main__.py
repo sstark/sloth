@@ -233,6 +233,9 @@ class WheelManager():
                     break
 
     def make_wingroup(self):
+        for spr in self.wingroup:
+            spr.unmark()
+        self.wingroup.empty()
         for winline, wins in self.winning_lines.items():
             if wins > 2:
                 for x in range(wins):
