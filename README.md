@@ -11,3 +11,4 @@ never get out of beta.
 
 
 Fruit assets by Robert Brooks (www.gamedeveloperstudio.com)
+Steak asset by Nguyen Ho
